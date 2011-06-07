@@ -1,0 +1,4 @@
+AddDefaultCharset utf-8
+
+RewriteEngine on
+RewriteRule ^ajax_(.*)$ ajax/$1.php

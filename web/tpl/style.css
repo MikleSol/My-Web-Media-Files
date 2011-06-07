@@ -1,0 +1,57 @@
+*{
+margin:0;
+padding:0;
+}
+
+.body {
+WIDTH: 90%;
+MARGIN: 30px auto;
+}
+
+#dialog-lpage, #dialog-login {
+    text-align: center;
+}
+
+#tooltip {
+	position: absolute;
+	z-index: 3000;
+	border: 1px solid #111;
+	background-color: #eee;
+	padding: 5px;
+	opacity: 1;
+}
+#tooltip h3, #tooltip div { margin: 0; }
+
+.head {
+TEXT-ALIGN: center;
+FONT-SIZE: 20px;
+WIDTH: 100%;
+}
+
+.user_box {
+padding: 0;
+margin: 0;
+FONT-SIZE: 14px;
+FLOAT: right;
+}
+
+.footer {
+TEXT-ALIGN: right;
+WIDTH: 100%;
+}
+
+.upload_box {
+TEXT-ALIGN: center;
+PADDING-TOP: 40px;
+MARGIN: 30px auto 30px;
+}
+
+.upload_box p{
+TEXT-ALIGN: left;
+}
+
+.uinfo td {
+text-align: center;
+}
+
+.ui-progressbar-value { background-image: url(images/pbar-ani.gif); }

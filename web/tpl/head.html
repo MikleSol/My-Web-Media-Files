@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="ru">
+<head>
+    <title>My Web Media Files (beta)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="file hosting, hosting, files, images, video, media, multimedia" />
+
+    <link href="/tpl/style.css" rel="stylesheet" type="text/css" />
+    <link href="http://yandex.st/jquery-ui/1.8.0/themes/base/jquery.ui.all.min.css" rel="stylesheet" type="text/css" />
+
+    <script src="http://yandex.st/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
+    <script src="http://yandex.st/jquery-ui/1.8.7/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="http://yandex.st/jquery/form/2.52/jquery.form.min.js" type="text/javascript"></script>
+    <script src="/images/player/jwplayer.js" type="text/javascript"></script>
+    <script src="/images/jquery.tooltip.min.js" type="text/javascript"></script>
+    <script src="/images/jquery.ba-bbq.min.js" type="text/javascript"></script>
+    <script src="/images/jquery.cookie.js" type="text/javascript"></script>
+    <script src="/images/jquery.json.js" type="text/javascript"></script>
+    <script src="/images/uploader/swfupload.js" type="text/javascript"></script>
+    <script src="/images/uploader/swfupload.queue.js" type="text/javascript"></script>
+    <script src="/images/uploader/swfupload.speed.js" type="text/javascript"></script>
+    <script src="/images/uploader/handlers.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://yandex.st/share/share.js" charset="utf-8"></script>
+
+    <script type="text/javascript">
+	var $add=[], view_i=0;
+	$(document).ready(function() {
+            $( "#upload_box" ).tabs({
+                ajaxOptions: {
+                    error: function( xhr, status, index, anchor ) {
+                    $( anchor.hash ).html("Ошибка при загрузке страницы.");
+                    }
+		}
+            });
+            $( "#dialog:ui-dialog" ).dialog( "destroy" );
+            $( "#dialog-lpage" ).dialog({
+                width: 360,
+                autoOpen: false,
+                resizable: false,
+                closeOnEscape: false,
+                draggable: false,
+                modal: true
+            });
+            $( "#dialog-login" ).dialog({
+                width: 360,
+                autoOpen: false,
+                resizable: false,
+                closeOnEscape: true,
+                draggable: true,
+                modal: true
+            });
+            $( "#dialog-modal" ).dialog({
+                width: 600,
+                autoOpen: false,
+                resizable: false,
+                closeOnEscape: false,
+                draggable: false,
+                modal: true
+            });
+            var options_logon = { 
+                success:       showResponse,
+                url:       '/ajax_auth',
+                type:      'post',
+                data: { auth: 'true' }
+            }; 
+             $('#loginme').submit(function() { 
+                $(this).ajaxSubmit(options_logon); 
+                return false; 
+            });  
+            var options_lgout = { 
+                success: function(responseText, statusText, xhr, $form){ alert('Вы вышли из системы'); location.href='/'; },
+                url:       '/ajax_auth',
+                type:      'post',
+                data: { logout: 'true' }
+            }; 
+ 
+            $('#logoutln').click(function() { 
+                $(this).ajaxSubmit(options_lgout); 
+                return false; 
+            });  
+
+            $('#logon').click(function(){
+                $('#dialog-login').dialog('open');
+            });
+            $('#regon').click(function(){
+                tab_add('#register','Регистрация','/ajax_register');
+            });
+
+            $('#profile_ln').click(function(){
+                tab_add('#profile','Мой профиль','/ajax_profile');
+            });
+            $('#files_ln').click(function(){
+                tab_add('#files','Мои файлы','/ajax_files');
+            });
+            $('#pay_ln').click(function(){
+                tab_add('#pay','Мои платежи','/ajax_pay');
+            });
+            initialize();
+
+	});
+        function initialize() {
+            $(window).bind('hashchange', function(event) {
+                if($.cookie("tab_files") > 0) tab_add('#files','Мои файлы','/ajax_files');
+                if($.cookie("tab_profile") > 0) tab_add('#profile','Мой профиль','/ajax_profile');
+                if($.cookie("tab_pay") > 0) tab_add('#pay','Мои платежи','/ajax_pay');
+                if($.cookie("tab_register") > 0) tab_add('#register','Регистрация','/ajax_register');
+                var state = event.getState(), hash_str = event.fragment, hash_match=hash_str.match(/(\.*)_(\.*)/ig), hash_param=hash_str.replace(/_(\w+)/ig,''),hash_val=hash_str.replace(/(\w+)_/ig,'');
+                if(hash_str == "files") tab_add('#files','Мои файлы','/ajax_files');
+                if(hash_str == "profile") tab_add('#profile','Мой профиль','/ajax_profile');
+                if(hash_str == "pay") tab_add('#pay','Мои платежи','/ajax_pay');
+                if(hash_str == "register") tab_add('#register','Регистрация','/ajax_register');
+                if(hash_match == "_") tab_add('#'+hash_param+'_'+hash_val,'Информация о файле','/ajax_'+hash_param+'?file='+hash_val);
+            }).trigger('hashchange');
+        }
+        function tab_add(name, rusname, url, pos){
+            name_str = name, name_match=name_str.match(/(\.*)_(\.*)/ig), name_param=name_str.replace(/_(\w+)/ig,''),name_val=name_str.replace(/(\w+)_/ig,'');
+            if(name_match != "_"){
+                name_val=name_str.replace(/#(\.*)/ig,'');
+                $.cookie("tab_"+name_val,"1");
+            }
+            if($add[name] != 1){
+              $("#upload_box").tabs("add" , name , rusname , pos);
+                    $(name).load(url);
+                    $add[name]=1;
+            }
+            $("#upload_box").tabs("select", name);
+        }
+        function tab_close(name){
+            name_str = name, name_match=name_str.match(/(\.*)_(\.*)/ig), name_param=name_str.replace(/_(\w+)/ig,''),name_val=name_str.replace(/(\w+)_/ig,'');
+            if(name_match != "_"){
+                name_val=name_str.replace(/#(\.*)/ig,'');
+                $.cookie("tab_"+name_val,null);
+            }
+            $("#upload_box").tabs("select", 0);
+            $("#upload_box").tabs("remove" , name);
+            $add[name]=0;
+        }
+
+        function showResponse(responseText, statusText, xhr, $form)  { 
+            if(responseText == "false"){
+                alert("Неверный логин или пароль");
+            }
+            if(responseText == "true"){
+                alert("Вы успешно вошли в систему.");
+                location.href='/';
+            }
+        } 
+    </script>
+</head>
+<body>
+    <div class="body">
+        <div class="head">
+            My Web Media Files <sup><small>[1.0-beta]</small></sup>
+            <div class="user_box" style="text-align:center;">
+            <?
+            $user_id=$user->check_auth($_COOKIE['session_key']);
+            if($user_id == false){
+            ?>
+            Добро пожаловать Гость<BR>
+            <a href="javascript:;" id="logon">Вход</a> 
+            <a href="#register" id="regon">Регистрация</a>
+            <?
+            }else{
+            $user_info=$user->user_info($user_id);
+            ?>
+            Добро пожаловать <?=$user_info['user_name'];?><BR>
+            Ваша группа: <?=$user_info['user_group_name'];?><BR>
+            <!--Ваш баланс: <?=$user_info['user_money'];?> руб.<BR>-->
+            <a href="#profile" id="profile_ln">Профиль</a> <a href="#files" id="files_ln">Файлы</a> <!--<a href="#pay" id="pay_ln">Платежи</a>--> <a id="logoutln" href="javascript:;">Выход</a>
+            <?
+            }
+            ?>
+            </div>
+        </div>
+
+    <div id="dialog-lpage" title="Загрузка">
+        Подождите идет загрузка<br>
+        <img src="/images/loading.gif">
+    </div>
+
+    <div id="dialog-login" title="Вход">
+    <form id="loginme">
+    <table>
+    <tr><td>E-mail:</td><td><input type="text" name="lg_email"></td></tr>
+    <tr><td>Password:</td><td><input type="password" name="lg_passwd"></td></tr>
+    <tr><td colspan="2" align="center">Остаться в системе <input type="checkbox" name="lg_all" value="1"></td></tr>
+    <tr><td colspan="2" align="center"><input type="submit" value="LogIn"> <input type="button" value="Cancel" onclick="$('#dialog-login').dialog('close');"></td></tr>
+    </table>
+    </form>
+    </div>
+    <div class="upload_box">
+        <div id="upload_box"> 
+            <ul> 
+                <li><a href="#index">Загрузка файлов</a></li> 
+                <!--<li><a href="/ajax_faq">ЧаВо</a></li> -->
+                <li><a href="/ajax_rules">Правила</a></li> 
+                <li><a href="/ajax_soft">Софт</a></li> 
+                <li><a href="/ajax_about">О проекте</a></li>
+            </ul> 
